@@ -1,0 +1,12 @@
+{
+  "name": "rps",
+  "version": "0.0.1",
+  "description": "A game of rock paper sissors made on the block chain",
+  "main": "src/index.js",
+  "repository": "git@github.com:michaelbpaulson/rps.git",
+  "author": "michael@svcryptotraders.com",
+  "license": "MIT",
+  "devDependencies": {
+    "eosjs": "^6.1.0"
+  }
+}

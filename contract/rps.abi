@@ -1,0 +1,93 @@
+{
+  "types": [{
+      "new_type_name": "account_name",
+      "type": "name"
+  }],
+  "structs": [{
+      "name": "shoot",
+      "base": "",
+      "fields": {
+        "game_id": "uint64",
+        "player": "account_name",
+        "move": "uint8"
+      }
+    },{
+      "name": "prx",
+      "base": "",
+      "fields": {
+        "player": "account_name"
+      }
+    },{
+      "name": "debug",
+      "base": "",
+      "fields": {
+        "game_id": "uint64"
+      }
+    },{
+      "name": "agames",
+      "base": "",
+      "fields": {
+        "by": "account_name",
+        "game_id": "uint64"
+      }
+    },{
+      "name": "game",
+      "base": "",
+      "fields": {
+        "game_id": "uint64",
+        "player": "account_name",
+        "opponent": "account_name",
+        "winner": "account_name",
+        "p_move": "uint8",
+        "o_move": "uint8"
+      }
+    },{
+      "name": "account",
+      "base": "",
+      "fields": {
+        "player": "account_name",
+        "games_played": "uint32",
+        "wins": "uint32",
+        "losses": "uint32",
+        "ties": "uint32",
+        "rock": "uint32",
+        "paper": "uint32",
+        "sissor": "uint32"
+      }
+  }],
+  "actions": [{
+      "action_name": "shoot",
+      "type": "shoot"
+    }, {
+      "action_name": "request",
+      "type": "prx"
+    }, {
+      "action_name": "debug",
+      "type": "debug"
+    }],
+  "tables": [{
+      "table_name": "games",
+      "index_type": "i64",
+      "key_names": [ "game_id" ],
+      "key_types": [ "uint64" ],
+      "type": "game"
+  }, {
+      "table_name": "prx",
+      "index_type": "i64",
+      "key_names": [ "game_id" ],
+      "key_types": [ "uint64" ],
+      "type": "prx"
+  }, {
+      "table_name": "agames2",
+      "index_type": "i64",
+      "key_names": [ "by" ],
+      "key_types": [ "uint64" ],
+      "type": "agames"
+  }, {
+      "table_name": "accounts",
+      "index_type": "i64",
+      "key_names": [ "player" ],
+      "key_types": [ "uint64" ],
+      "type": "account"
+  }]
+}

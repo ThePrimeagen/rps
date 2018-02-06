@@ -4,7 +4,6 @@
  */
 #include <rps.hpp>
 
-
 namespace rps {
 
     void getOrCreateAccount(account& a) {
@@ -54,6 +53,13 @@ namespace rps {
         assert(Accounts::update(a), "Unable to update the account");
     }
 
+    uint64_t getGameId() {
+        game backGame;
+        Games::back(backGame);
+
+        return (backGame.game_id) ? backGame.game_id + 1 : 1;
+    }
+
     void finishGame(game& g) {
 
         if (g.p_move == Move::none || g.o_move == Move::none) {
@@ -77,12 +83,12 @@ namespace rps {
 
         rps::getOrCreateAccount(player);
         rps::getOrCreateAccount(opponent);
-        rps::updateAccount(player, playerWins, tie, g.p_move);
-        rps::updateAccount(opponent, !playerWins, tie, g.o_move);
+        rps::updateAccount(player, !tie && playerWins, tie, g.p_move);
+        rps::updateAccount(opponent, !tie && !playerWins, tie, g.o_move);
         assert(Games::update(g), "Could not finish game.");
     }
 
-    void apply_request(const prx& s) {
+    void apply_request(const rx& s) {
         require_auth(s.player);
 
         prx gpr;
@@ -90,28 +96,25 @@ namespace rps {
 
         // TODO: Create game
         if (!exists) {
-            prx p(s.player);
+            uint64_t gameId = rps::getGameId();
+
+            prx p(gameId, s.player);
             assert(PendingRequests::store(p), "Could not store pending requset");
+
+            agame aGame(gameId);
+            assert(ActiveGames::store(aGame, s.player), "Could not store active game for pending request");
             return;
         }
 
         assert(s.player != gpr.player, "You cannot play yourself");
 
-        agames checkForDupes;
-        checkForDupes.by = gpr.player;
+        agame hasGame;
+        assert(!ActiveGames::front(hasGame, s.player), "You cannot have multiple active games");
 
-        assert(!ActiveGames::get(checkForDupes, s.player), "You already have an active game against this opponent");
+        agame newAGame(gpr.game_id);
+        assert(ActiveGames::store(newAGame, s.player), "Could not store active game for challenger.");
 
-        game backGame;
-        Games::back(backGame);
-
-        uint64_t gameId = (backGame.game_id) ? backGame.game_id + 1 : 1;
-
-        agames ap(gpr.player, gameId);
-
-        assert(ActiveGames::store(ap, s.player), "could not store player active game");
-
-        game g(gameId, s.player, gpr.player);
+        game g(gpr.game_id, s.player, gpr.player);
         assert(Games::store(g), "Could not store game");
         assert(PendingRequests::remove(gpr), "Could not remove the pending hame");
     }
@@ -127,6 +130,9 @@ namespace rps {
         assert(g.player == s.by || g.opponent == s.by, "This game can only be played by the players.");
         assert(g.winner == N(none), "You are not allowed to 1984 the past!  The game is complete.");
 
+        agame agameToRemove(g.game_id);
+        assert(ActiveGames::remove(agameToRemove, s.by), "Unable to remove active game for player");
+
         uint8_t move;
         if (g.player == s.by) {
             assert(g.p_move == 0, "You have already shot, you cannot shoot again.");
@@ -139,17 +145,6 @@ namespace rps {
         }
 
         rps::finishGame(g);
-    }
-
-    void apply_debug(const debug& d) {
-        game g;
-        g.game_id = d.game_id;
-        assert(Games::get(g), "Game does not exist");
-
-        eosio::print("GameID(", g.game_id, "):\n");
-        eosio::print(eosio::name(g.player), "(", static_cast<uint32_t>(g.p_move));
-        eosio::print(") vs (");
-        eosio::print(static_cast<uint32_t>(g.o_move), ") ", eosio::name(g.opponent));
     }
 };
 
@@ -175,10 +170,7 @@ extern "C" {
                     rps::apply_shoot(current_message<rps::shoot>());
                     break;
                 case N(request):
-                    rps::apply_request(current_message<rps::prx>());
-                    break;
-                case N(debug):
-                    rps::apply_debug(current_message<rps::debug>());
+                    rps::apply_request(current_message<rps::rx>());
                     break;
             }
         }

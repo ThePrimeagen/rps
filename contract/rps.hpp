@@ -2,6 +2,7 @@
  *  @file
  *  @copyright defined in eos/LICENSE.txt
  */
+#pragma once
 #include <eoslib/eos.hpp>
 #include <eoslib/db.hpp>
 
@@ -29,15 +30,21 @@ namespace rps {
 
     };
 
-    struct PACKED(debug) {
-        uint64_t game_id;
+    struct PACKED(rx) {
+        rx() {};
+        rx(account_name p) {
+            player = p;
+        };
+        account_name player;
     };
 
     struct PACKED(prx) {
         prx() {};
-        prx(account_name p) {
+        prx(uint64_t gid, account_name p) {
             player = p;
+            game_id = gid;
         };
+        uint64_t game_id;
         account_name player;
     };
 
@@ -47,13 +54,11 @@ namespace rps {
         Move move;
     };
 
-    struct PACKED(agames) {
-        agames() {};
-        agames(account_name player, uint64_t id) {
+    struct PACKED(agame) {
+        agame() {};
+        agame(uint64_t id) {
             game_id = id;
-            by = player;
         };
-        account_name by;
         uint64_t game_id;
     };
 
@@ -86,6 +91,6 @@ namespace rps {
 
     typedef table <N(rps), N(rps), N(games), game, uint64_t> Games;
     typedef table <N(rps), N(rps), N(prx), prx, uint64_t> PendingRequests;
-    typedef table <N(rps), N(rps), N(agames2), agames, uint64_t> ActiveGames;
+    typedef table <N(rps), N(rps), N(agames), agame, uint64_t> ActiveGames;
     typedef table <N(rps), N(rps), N(accounts), account, uint64_t> Accounts;
 }

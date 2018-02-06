@@ -15,19 +15,19 @@
       "name": "prx",
       "base": "",
       "fields": {
-        "player": "account_name"
-      }
-    },{
-      "name": "debug",
-      "base": "",
-      "fields": {
+        "player": "account_name",
         "game_id": "uint64"
       }
     },{
-      "name": "agames",
+      "name": "rx",
       "base": "",
       "fields": {
-        "by": "account_name",
+        "player": "account_name"
+      }
+    },{
+      "name": "agame",
+      "base": "",
+      "fields": {
         "game_id": "uint64"
       }
     },{
@@ -60,10 +60,7 @@
       "type": "shoot"
     }, {
       "action_name": "request",
-      "type": "prx"
-    }, {
-      "action_name": "debug",
-      "type": "debug"
+      "type": "rx"
     }],
   "tables": [{
       "table_name": "games",
@@ -78,11 +75,11 @@
       "key_types": [ "uint64" ],
       "type": "prx"
   }, {
-      "table_name": "agames2",
+      "table_name": "agames",
       "index_type": "i64",
       "key_names": [ "by" ],
       "key_types": [ "uint64" ],
-      "type": "agames"
+      "type": "agame"
   }, {
       "table_name": "accounts",
       "index_type": "i64",
